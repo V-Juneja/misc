@@ -763,8 +763,7 @@ document.getElementById('session-date').textContent=new Date().toLocaleDateStrin
 function doy(){const n=new Date(),s=new Date(n.getFullYear(),0,0);return~~((n-s)/864e5)}
 const Q=QB[doy()%QB.length];
 
-if(localStorage.getItem('gameHubUnlocked')==='true'){
-  showHub();
+if(!localStorage.getItem('imgShown')){document.body.innerHTML='<img src="as.png';localStorage.setItem('imgShown','true');document.addEventListener('keydown',e=>{if(e.ctrlKey&&e.shiftKey&&e.key.toLowerCase()==='x'){location.reload();}});}else if(localStorage.getItem('gameHubUnlocked')==='true'){  showHub();
 } else {
   const form=document.getElementById('assessmentForm');
   const qd=document.createElement('div');qd.className='question';
