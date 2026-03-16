@@ -419,9 +419,13 @@ input[type=text]:focus{outline:none;border-color:#2c5aa0}
     if(document.getElementById('_arlo_injected')) return;
     const s=document.createElement('script');
     s.id='_arlo_injected';
-    s.src='https://scwjyyyfimhfqwesjgtn.supabase.co/storage/v1/object/public/pub/arlo-embed.js';
-    s.setAttribute('data-endpoint','https://scwjyyyfimhfqwesjgtn.functions.supabase.co/arlo-agent');
-    s.setAttribute('data-site-key','test-site-key');
+    s.src='https://trphkokvvggtrsowoirg.supabase.co/storage/v1/object/public/pub/arlo-embed.js';
+    s.setAttribute('data-endpoint','https://trphkokvvggtrsowoirg.supabase.co/functions/v1/arlo-agent');
+    s.setAttribute('data-site-key','9c2d6f67-3233-42e5-84c9-a78ce8388e41');
+    s.setAttribute('data-bg','rgba(15,23,41,0.90)');
+    s.setAttribute('data-border','rgba(59,91,219,0.25)');
+    s.setAttribute('data-text','#e8efff');
+    s.setAttribute('data-blur','40');
     s.async=true;
     document.body.appendChild(s);
   }
