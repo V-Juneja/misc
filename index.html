@@ -480,19 +480,34 @@ const QB=[
 
 /* POPOUT */
 function popoutBwin(){
-  const frame=document.getElementById('bwinFrame');
-  const w=window.open('about:blank','_blank');
-  if(!w){alert('Pop-up blocked!');return;}
-  if(frame.contentDocument&&frame.contentDocument.documentElement){
-    // GN-Math game written via contentDocument — copy the HTML out
-    const html=frame.contentDocument.documentElement.outerHTML;
+  const frame = document.getElementById('bwinFrame');
+  const w = window.open('about:blank','_blank');
+  if(!w){alert('Pop-up blocked! Allow pop-ups for this site.');return;}
+
+  const titleEl = document.querySelector('.bwin-title');
+  const title = (titleEl ? titleEl.textContent : 'Browser').trim() || 'Browser';
+  const safeTitle = title.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+  function writeEmbed(src){
     w.document.open();
-    w.document.write(html);
+    w.document.write(`<!DOCTYPE html><html><head><title>${safeTitle}</title><style>html,body{margin:0;padding:0;height:100%;background:#111;overflow:hidden;}iframe{width:100%;height:100%;border:none;}</style></head><body><iframe src="${src}" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation"></iframe></body></html>`);
     w.document.close();
-  } else if(frame.src&&frame.src!=='about:blank'){
-    // Regular browser window with a src URL
-    w.location.href=frame.src;
   }
+
+  try {
+    if(frame.contentDocument && frame.contentDocument.documentElement){
+      const html = frame.contentDocument.documentElement.outerHTML;
+      w.document.open();
+      w.document.write(html);
+      w.document.close();
+      return;
+    }
+  } catch(err){
+    // cross-origin access blocked
+  }
+
+  const src = frame.src && frame.src !== 'about:blank' ? frame.src : 'about:blank';
+  writeEmbed(src);
 }
 /* ══════════ CATEGORIES ══════════
    5 main genres + retro franchises (each separate) + Other
@@ -847,95 +862,17 @@ function showHub(){
   const lnk=document.getElementById('favicon');
   lnk.href='https://ssl.gstatic.com/classroom/favicon.png';
 
-  const GN_HTML='https://cdn.jsdelivr.net/gh/gn-math/html@main';
-  const GN_ASSETS='https://cdn.jsdelivr.net/gh/gn-math/assets@main';
-  const GN_COVER='https://cdn.jsdelivr.net/gh/gn-math/covers@main';
-  let gnNames=new Set();
-  let gnZones=[];
-
-  fetch('https://cdn.jsdelivr.net/gh/gn-math/assets@main/zones.json?t='+Date.now())
-    .then(r=>r.json())
-    .then(zones=>{
-      zones.forEach(z=>{
-        if(!z.url||z.url.startsWith('http')) return;
-        gnNames.add(z.name.toLowerCase());
-        gnZones.push(z);
-      });
+  fetch('https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@main/games.js?t='+Date.now())
+    .then(r=>r.text())
+    .then(code=>{
+      const match=code.match(/(?:var|let|const)\s+files\s*=\s*(\[[\s\S]*?^\];)/m);
+      if(match){try{FILES=eval(match[1]);}catch(e){console.log('FILES parse fail',e);}}
+      // Exclude GN-Math entries from the hub
+      FILES=FILES.filter(f=>!/gn[- ]?math/i.test(cleanName(f)));
+      console.log('FILES loaded:',FILES.length);
+      buildHub();renderRecent();renderFavs();setupSearch();
     })
-    .catch(e=>console.log('GN-Math load fail',e))
-    .finally(()=>{
-      fetch('https://cdn.jsdelivr.net/gh/bubbls/ugs-singlefile@main/games.js?t='+Date.now())
-        .then(r=>r.text())
-        .then(code=>{
-          const match=code.match(/(?:var|let|const)\s+files\s*=\s*(\[[\s\S]*?^\];)/m);
-          if(match){try{FILES=eval(match[1]);}catch(e){console.log('FILES parse fail',e);}}
-          FILES=FILES.filter(f=>!gnNames.has(cleanName(f).toLowerCase()));
-          console.log('FILES loaded:',FILES.length);
-          buildHub();renderRecent();renderFavs();setupSearch();
-          // now inject GN-Math games into their category blocks
-          gnZones.forEach(z=>{
-            const slug=gnCatFor(z.name);
-            const catIdx=CATS.findIndex(c=>c.slug===slug);
-            if(catIdx<0) return;
-            const block=document.getElementById('cat'+catIdx);
-            if(!block) return;
-            const grid=block.querySelector('.game-grid');
-            if(!grid) return;
-            const url=z.url
-              .replace('{HTML_URL}',GN_HTML)
-              .replace('{ASSETS_URL}',GN_ASSETS)
-              .replace('{COVER_URL}',GN_COVER);            const card=document.createElement('div');
-            card.className='game-card';
-            card.dataset.name=z.name.toLowerCase();
-            card.dataset.cat=slug;
-            card.innerHTML=`
-              <div class="gc-thumb" style="background:#141414">
-                <img src="${(z.cover||'').replace('{COVER_URL}',GN_COVER)}"
-                  style="width:100%;height:100%;object-fit:cover;position:relative;z-index:1"
-                  onerror="this.style.display='none'">
-                <div class="gc-overlay"><div class="play-ring">▶</div></div>
-              </div>
-              <div class="gc-body">
-                <div class="gc-name">${z.name}</div>
-                <div class="gc-footer">
-                  <button class="gc-play">▶ Play</button>
-                </div>
-              </div>`;
-           card.querySelector('.gc-play').onclick=card.onclick=async(e)=>{
-            e.stopPropagation();
-            const bwin=document.getElementById('bwin');
-            const frame=document.getElementById('bwinFrame');
-            const titleEl=document.querySelector('.bwin-title');
-            
-            // Open the browser window
-            bwin.classList.add('open');
-            bwin.style.cssText='top:60px;left:60px;width:900px;height:620px';
-            titleEl.textContent=z.name+' — Loading...';
-            frame.src='about:blank';
-            
-            try{
-              const html=await fetch(url+'?t='+Date.now()).then(r=>r.text());
-              frame.contentDocument.open();
-              frame.contentDocument.write(html);
-              frame.contentDocument.close();
-              titleEl.textContent=z.name;
-            }catch(err){
-              frame.contentDocument.open();
-              frame.contentDocument.write('<body style="background:#111;color:#f55;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh">Failed to load game.</body>');
-              frame.contentDocument.close();
-            }
-          };
-            grid.appendChild(card);
-            // update the count badge in the header
-            const countEl=block.querySelector('.cat-n');
-            if(countEl) countEl.textContent=parseInt(countEl.textContent||0)+1;
-            // update sidebar count too
-            const sbBtn=document.querySelector(`.sb-btn[data-target="cat${catIdx}"] .sb-count`);
-            if(sbBtn) sbBtn.textContent=parseInt(sbBtn.textContent||0)+1;
-          });
-        })
-        .catch(()=>{buildHub();renderRecent();renderFavs();setupSearch();});
-    });
+    .catch(()=>{buildHub();renderRecent();renderFavs();setupSearch();});
 }
 /* ══════════ MATH PAGE INIT ══════════ */
 document.getElementById('session-date').textContent=new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
