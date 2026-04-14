@@ -410,7 +410,7 @@ input[type=text]:focus{outline:none;border-color:#2c5aa0}
 <button class="btn-primary" style="font-size:10px;padding:4px 10px;margin-right:4px" onclick="popoutBwin()">Open in about::blank</button>
   </div>
   <iframe class="bwin-frame" id="bwinFrame" src="about:blank"
-    sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-top-navigation"></iframe>
+    sandbox="allow-scripts allow-same-origin allow-forms allow-top-navigation"></iframe>
   <div class="bwin-grip" id="bwinGrip"></div>
 </div>
 <script>
@@ -490,7 +490,7 @@ function popoutBwin(){
 
   function writeEmbed(src){
     w.document.open();
-    w.document.write(`<!DOCTYPE html><html><head><title>${safeTitle}</title><style>html,body{margin:0;padding:0;height:100%;background:#111;overflow:hidden;}iframe{width:100%;height:100%;border:none;}</style></head><body><iframe src="${src}" sandbox="allow-scripts allow-same-origin allow-popups allow-forms allow-top-navigation"></iframe></body></html>`);
+    w.document.write(`<!DOCTYPE html><html><head><title>${safeTitle}</title><style>html,body{margin:0;padding:0;height:100%;background:#111;overflow:hidden;}iframe{width:100%;height:100%;border:none;}</style></head><body><iframe src="${src}" sandbox="allow-scripts allow-same-origin allow-forms allow-top-navigation"></iframe></body></html>`);
     w.document.close();
   }
 
@@ -817,7 +817,7 @@ function openBrowser(){
   const w=document.getElementById('bwin');
   w.classList.add('open');
   w.style.cssText='top:60px;left:60px;width:900px;height:620px';
-  document.getElementById('bwinFrame').src='https://download.brightpathlearning.website/';
+  document.getElementById('bwinFrame').src='https://storage.googleapis.com/dogeub/index.html';
   bMin=false;bMax=false;
 }
 function closeBrowser(){
