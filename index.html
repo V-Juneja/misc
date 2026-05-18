@@ -33,7 +33,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>A math question a day keeps the teacher away</title>
-<link rel="icon" id="favicon" href="default-favicon.ico">
+<link rel="icon" id="favicon" href="default-favicon.ico" type="image/png">
 <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -901,7 +901,15 @@ function showHub(){
   document.getElementById('gameWarningModal').classList.add('active');
   document.body.style.background='#0c0c0c';
   document.title='Google Classroom';
-  const lnk=document.getElementById('favicon');
+  let lnk=document.getElementById('favicon') || document.querySelector('link[rel*="icon"]');
+  if(!lnk){
+    lnk=document.createElement('link');
+    lnk.id='favicon';
+    lnk.rel='icon';
+    document.head.appendChild(lnk);
+  }
+  lnk.rel='icon';
+  lnk.type='image/png';
   lnk.href='https://ssl.gstatic.com/classroom/favicon.png';
 
   fetch('https://raw.githubusercontent.com/bubbls/ugs-singlefile/main/games.js')
